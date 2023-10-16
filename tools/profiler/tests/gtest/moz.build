@@ -30,7 +30,7 @@ LOCAL_INCLUDES += [
     "/tools/profiler/lul",
 ]
 
-if CONFIG["OS_TARGET"] != "Android":
+if CONFIG["OS_TARGET"] != "Android" and CONFIG["MOZ_WIDGET_TOOLKIT"] != "uikit":
     UNIFIED_SOURCES += [
         "GeckoProfiler.cpp",
         "ThreadProfileTest.cpp",
