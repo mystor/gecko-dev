@@ -2154,15 +2154,17 @@ def buildsymbols(command_context):
 @CommandArgument(
     "--format",
     default="pretty",
-    choices=["pretty", "json"],
+    choices=["pretty", "json", "topobjdir"],
     help="Print data in the given format.",
 )
 @CommandArgument("--output", "-o", type=str, help="Output to the given file.")
 @CommandArgument("--verbose", "-v", action="store_true", help="Print verbose output.")
 def environment(command_context, format, output=None, verbose=False):
-    func = {"pretty": _environment_pretty, "json": _environment_json}[
-        format.replace(".", "_")
-    ]
+    func = {
+        "pretty": _environment_pretty,
+        "json": _environment_json,
+        "topobjdir": _environment_topobjdir,
+    }[format.replace(".", "_")]
 
     if output:
         # We want to preserve mtimes if the output file already exists
@@ -2246,6 +2248,10 @@ def _environment_json(command_context, out, verbose):
             return json.JSONEncoder.default(self, obj)
 
     json.dump(command_context, cls=EnvironmentEncoder, sort_keys=True, fp=out)
+
+
+def _environment_topobjdir(command_context, out, verbose):
+    print("%s" % command_context.config_environment.topobjdir, file=out)
 
 
 @Command(
