@@ -212,6 +212,17 @@ with only_when(target_is_ios):
 
 
 with only_when(target_is_ios):
+    @depends(target)
+    def ios_is_simulator(target):
+        # FIXME: I worry this is incorrect for x86_64 simulators, but it
+        # matches ios_sdk below.
+        if target.raw_os == "ios-sim":
+            return True
+
+    set_config("IPHONEOS_IS_SIMULATOR", ios_is_simulator)
+
+
+with only_when(target_is_ios):
     # MacOS SDK
     # =========
     option(
