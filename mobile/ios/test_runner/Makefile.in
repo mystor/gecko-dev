@@ -1,0 +1,29 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+dist_dest = $(DIST)/TestRunner.app
+
+# Check if we're targeting a simulator or a real device
+ifeq ($(TARGET_CPU)-$(TARGET_RAW_OS),aarch64-ios)
+supported_platform = iPhoneOS
+else
+supported_platform = iPhoneSimulator
+endif
+
+repackage::
+	$(RM) -r $(dist_dest)
+
+.PHONY: repackage
+tools repackage:: $(DIST)/bin/TestRunner
+	rm -rf $(dist_dest)
+	$(MKDIR) -p '$(dist_dest)/Frameworks'
+	$(call py_action,preprocessor,-Fsubstitution -DAPP_VERSION='$(MOZ_APP_VERSION)' -DSUPPORTED_PLATFORM='$(supported_platform)' $(srcdir)/Info.plist.in -o '$(dist_dest)/Info.plist')
+	# Once we have a better system for packaging XUL into a .framework, we
+	# should depend on it in that way here too, but for now shove everything
+	# into the bundle root.
+	rsync -pvtrlL --include '/*.dylib' --include "/XUL" --include "/TestRunner" --exclude '*' $(DIST)/bin/ '$(dist_dest)'
+	# Dump everything else into `/Frameworks` because that's where it's
+	# expected ATM. We'll want to change this in the future.
+	rsync -pvtrlL --exclude '/*.dylib' --exclude '/XUL' --exclude "Test*" --exclude "test_*" --exclude "*_unittest" --exclude xulrunner $(DIST)/bin/ '$(dist_dest)/Frameworks'
+	printf APPLMOZB > '$(dist_dest)/PkgInfo'

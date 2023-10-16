@@ -1,0 +1,61 @@
+# test_runner
+
+This is a simple application, intended to eventually be the in-tree test runner
+application for basic tests like xpcshell and mochitests on iOS.
+
+## Building
+
+The `TestRunner.app` bundle will be built by mozbuild during the normal build
+process, and can be found in `$(TOPOBJDIR)/dist/TestRunner.app`.
+
+This approach was taken rather than using an xcode project to make it easier to
+integrate into the existing mozbuild build system.
+
+## Installing and Running on Simulator
+
+Install the TestRunner.app into the currently booted simulator. The `booted`
+argument can be replaced by a simulator identifier to specify a specific
+simulator.
+
+```
+$ xcrun simctl install booted path/to/objdir/dist/TestRunner.app
+```
+
+Run the installed TestRunner.app, optionally passing in arguments, and routing
+console output to the current console for debugging purposes.
+
+```
+$ xcrun simctl launch --console booted org.mozilla.TestRunner <argv>...
+```
+
+You can also pass `-w` to cause the application to pause until a debugger is
+connected. The command will log the pid of the application as it is starting so
+you can attach a debugger (e.g. from xcode).
+
+## Installing and Running on Device
+
+As of the time of writing, this has not yet been tested on an actual device. In
+order to do so, you'll need to build with a non-simulator target, and codesign
+the TestRunner.app bundle with a command like:
+
+```
+$ codesign --force --sign - --preserve-metadata=identifier,entitlements,resource-rules path/to/objdir/dist/TestRunner.app
+```
+
+Then you'll need to find a way to push the .app to the device to install & run
+it. I unfortunately haven't put in the effort to find the xcode commands to do
+this yet.
+
+## TODO
+
+This is very much an early POC of the design. There's currently no support for
+building for real devices (the Info.plist is hardcoded to simulator), and it
+doesn't actually do anything yet other than display a basic webpage.
+
+The intention is that this application should eventually support being
+configured by our test runners to be a mochitest test runner, xpcshell test
+runner, or similar.
+
+It loads and starts the application through the experimental `geckoview`
+Objective-C API, to keep it more similar to the API we intend to expose to
+embedders.
