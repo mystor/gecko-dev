@@ -14,7 +14,16 @@ EXPORTS += [
     "../cocoa/CFTypeRefPtr.h",
 ]
 
+EXPORTS.mozilla.widget += [
+    "/mobile/ios/GeckoViewAPI/Sources/GeckoViewSupport/include/GeckoViewSupport.h",
+    "AndroidView.h",
+    "EventDispatcher.h",
+    "nsWindow.h",
+]
+
 SOURCES += [
+    "EventDispatcher.mm",
+    "GeckoViewSupportImpl.mm",
     "GfxInfo.cpp",
     "MediaKeysEventSourceFactory.cpp",
     "nsAppShell.mm",
@@ -29,10 +38,18 @@ SOURCES += [
     "UIKitUtils.mm",
 ]
 
+XPIDL_SOURCES += [
+    "../android/nsIAndroidBridge.idl",
+]
+
+XPIDL_MODULE = "widget_uikit"
+
 include("/ipc/chromium/chromium-config.mozbuild")
 
 FINAL_LIBRARY = "xul"
 LOCAL_INCLUDES += [
+    "!/build",
+    "/mobile/ios/GeckoViewAPI/Sources/GeckoViewSupport/include",
     "/widget",
     "/widget/headless",
 ]

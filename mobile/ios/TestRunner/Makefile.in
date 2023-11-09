@@ -6,7 +6,7 @@ dist_dest = $(DIST)/TestRunner.xcarchive
 
 # Check if we're targeting a simulator or a real device.
 ifeq ($(TARGET_CPU)-$(TARGET_RAW_OS),aarch64-ios)
-dest_flags = -destination generic/platform=iOS
+dest_flags = -destination generic/platform=iOS -allowProvisioningUpdates
 else
 ifeq ($(TARGET_CPU),aarch64)
 dest_flags = -arch arm64 -sdk iphonesimulator

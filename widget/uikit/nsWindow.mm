@@ -46,6 +46,7 @@
 #include "mozilla/Unused.h"
 #include "mozilla/dom/MouseEventBinding.h"
 #include "mozilla/layers/NativeLayerCA.h"
+#include "mozilla/widget/AndroidView.h"
 #include "mozilla/widget/ScreenManager.h"
 #include "mozilla/gfx/Logging.h"
 #ifdef ACCESSIBILITY
@@ -1214,6 +1215,21 @@ void nsWindow::UnsuspendAsyncCATransactions() {
   }
 }
 
+void nsWindow::SetAndroidView(mozilla::widget::AndroidView* aView) {
+  mAndroidView = aView;
+}
+
+mozilla::widget::AndroidView* nsWindow::GetAndroidView() const {
+  return mAndroidView;
+}
+
+mozilla::widget::EventDispatcher* nsWindow::GetEventDispatcher() const {
+  if (mAndroidView) {
+    return mAndroidView->mEventDispatcher;
+  }
+  return nullptr;
+}
+
 already_AddRefed<nsIWidget> nsIWidget::CreateTopLevelWindow() {
   nsCOMPtr<nsIWidget> window = new nsWindow();
   return window.forget();
@@ -1236,3 +1252,23 @@ already_AddRefed<nsWindow> nsWindow::From(nsIWidget* aWidget) {
   RefPtr<nsWindow> window = do_QueryObject(aWidget);
   return window.forget();
 }
+
+namespace mozilla::widget {
+
+NS_IMPL_ISUPPORTS(AndroidView, nsIAndroidEventDispatcher, nsIAndroidView)
+
+AndroidView::~AndroidView() {
+  [mInitData release];
+}
+
+nsresult AndroidView::GetInitData(JSContext* aCx,
+                                  JS::MutableHandle<JS::Value> aOut) {
+  if (!mInitData) {
+    aOut.setNull();
+    return NS_OK;
+  }
+
+  return widget::EventDispatcher::UnboxBundle(aCx, mInitData, aOut);
+}
+
+}  // namespace mozilla::widget

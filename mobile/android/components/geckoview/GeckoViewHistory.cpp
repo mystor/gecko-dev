@@ -4,7 +4,9 @@
 
 #include "GeckoViewHistory.h"
 
-#include "JavaBuiltins.h"
+#ifdef MOZ_WIDGET_ANDROID
+#  include "JavaBuiltins.h"
+#endif
 #include "jsapi.h"
 #include "js/Array.h"               // JS::GetArrayLength, JS::IsArrayObject
 #include "js/PropertyAndElement.h"  // JS_GetElement
@@ -30,8 +32,10 @@ using namespace mozilla::dom;
 using namespace mozilla::ipc;
 using namespace mozilla::widget;
 
+#ifdef MOZ_WIDGET_ANDROID
 static const char16_t kOnVisitedMessage[] = u"GeckoView:OnVisited";
 static const char16_t kGetVisitedMessage[] = u"GeckoView:GetVisited";
+#endif
 
 // Keep in sync with `GeckoSession.HistoryDelegate.VisitFlags`.
 enum class GeckoViewVisitFlags : int32_t {
@@ -271,6 +275,7 @@ GeckoViewHistory::VisitURI(nsIWidget* aWidget, nsIURI* aURI,
     return NS_OK;
   }
 
+#ifdef MOZ_WIDGET_ANDROID
   // If nobody is listening for this, we can stop now.
   if (!dispatcher->HasListener(kOnVisitedMessage)) {
     return NS_OK;
@@ -336,6 +341,7 @@ GeckoViewHistory::VisitURI(nsIWidget* aWidget, nsIURI* aURI,
 
   Unused << NS_WARN_IF(
       NS_FAILED(dispatcher->Dispatch(kOnVisitedMessage, bundle, callback)));
+#endif
 
   return NS_OK;
 }
@@ -457,6 +463,7 @@ void GeckoViewHistory::QueryVisitedState(nsIWidget* aWidget,
     return;
   }
 
+#ifdef MOZ_WIDGET_ANDROID
   // If nobody is listening for this we can stop now
   if (!dispatcher->HasListener(kGetVisitedMessage)) {
     return;
@@ -488,6 +495,7 @@ void GeckoViewHistory::QueryVisitedState(nsIWidget* aWidget,
 
   Unused << NS_WARN_IF(
       NS_FAILED(dispatcher->Dispatch(kGetVisitedMessage, bundle, callback)));
+#endif
 }
 
 /**

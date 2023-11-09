@@ -5,7 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 EXTRA_JS_MODULES += [
-    "AndroidLog.sys.mjs",
     "BrowserUsageTelemetry.sys.mjs",
     "ChildCrashHandler.sys.mjs",
     "DelayedInit.sys.mjs",
@@ -39,6 +38,10 @@ EXTRA_JS_MODULES += [
     "LoadURIDelegate.sys.mjs",
     "MediaUtils.sys.mjs",
     "Messaging.sys.mjs",
+]
+
+EXTRA_PP_JS_MODULES += [
+    "AndroidLog.sys.mjs",
 ]
 
 XPCSHELL_TESTS_MANIFESTS += ["test/xpcshell/xpcshell.ini"]

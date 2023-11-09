@@ -49,7 +49,7 @@ static bool IsArg(const char* arg, const char* s) {
 
   mozilla::BootstrapConfig config;
   config.appData = &sAppData;
-  config.appDataPath = "browser";
+  config.appDataPath = nullptr;
 
   bootstrap.inspect()->XRE_EnableSameExecutableForContentProc();
   return bootstrap.inspect()->XRE_main(argc, argv, config);

@@ -36,6 +36,14 @@
  * truncates tags longer than MAX_TAG_LENGTH characters (not including "Gecko").
  */
 
+// android.util.Log.isLoggable throws IllegalArgumentException if a tag length
+// exceeds 23 characters, and we prepend five characters ("Gecko") to every tag.
+// However, __android_log_write itself and other android.util.Log methods don't
+// seem to mind longer tags.
+const MAX_TAG_LENGTH = 18;
+
+#ifdef MOZ_WIDGET_ANDROID
+
 import { ctypes } from "resource://gre/modules/ctypes.sys.mjs";
 
 // From <https://android.googlesource.com/platform/system/core/+/master/include/android/log.h>.
@@ -44,12 +52,6 @@ const ANDROID_LOG_DEBUG = 3;
 const ANDROID_LOG_INFO = 4;
 const ANDROID_LOG_WARN = 5;
 const ANDROID_LOG_ERROR = 6;
-
-// android.util.Log.isLoggable throws IllegalArgumentException if a tag length
-// exceeds 23 characters, and we prepend five characters ("Gecko") to every tag.
-// However, __android_log_write itself and other android.util.Log methods don't
-// seem to mind longer tags.
-const MAX_TAG_LENGTH = 18;
 
 var liblog = ctypes.open("liblog.so"); // /system/lib/liblog.so
 var __android_log_write = liblog.declare(
@@ -80,3 +82,28 @@ export var AndroidLog = {
     };
   },
 };
+
+#else
+
+// iOS shim for Android's logging APIs.
+export var AndroidLog = {
+  MAX_TAG_LENGTH,
+  v: (tag, msg) => dump(`V/Gecko${tag}(${Services.appinfo.processID}): ${msg}\n`),
+  d: (tag, msg) => dump(`D/Gecko${tag}(${Services.appinfo.processID}): ${msg}\n`),
+  i: (tag, msg) => dump(`I/Gecko${tag}(${Services.appinfo.processID}): ${msg}\n`),
+  w: (tag, msg) => dump(`W/Gecko${tag}(${Services.appinfo.processID}): ${msg}\n`),
+  e: (tag, msg) => dump(`E/Gecko${tag}(${Services.appinfo.processID}): ${msg}\n`),
+
+  bind(tag) {
+    return {
+      MAX_TAG_LENGTH,
+      v: AndroidLog.v.bind(null, tag),
+      d: AndroidLog.d.bind(null, tag),
+      i: AndroidLog.i.bind(null, tag),
+      w: AndroidLog.w.bind(null, tag),
+      e: AndroidLog.e.bind(null, tag),
+    };
+  },
+};
+
+#endif

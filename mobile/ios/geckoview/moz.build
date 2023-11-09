@@ -11,6 +11,7 @@ SOURCES += [
 
 LOCAL_INCLUDES += [
     "!/build",
+    "../GeckoViewAPI/Sources/GeckoViewAPI",
     "/widget",
     "/widget/headless",
     "/widget/uikit",

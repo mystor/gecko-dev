@@ -6,22 +6,26 @@
 #ifndef NSWINDOW_H_
 #define NSWINDOW_H_
 
+#include <objc/objc.h>
+
 #include "nsBaseWidget.h"
 #include "gfxPoint.h"
 
 #include "nsTArray.h"
 
-@class UIWindow;
-@class UIView;
+#ifdef __OBJC__
 @class ChildView;
+#endif
 
 namespace mozilla::layers {
 class NativeLayerRootCA;
 }
 
 namespace mozilla::widget {
+class AndroidView;
+class EventDispatcher;
 class TextInputHandler;
-}
+}  // namespace mozilla::widget
 
 #define NS_WINDOW_IID                                \
   {                                                  \
@@ -69,7 +73,7 @@ class nsWindow final : public nsBaseWidget {
   void ReportSizeEvent();
   void ReportSizeModeEvent(nsSizeMode aMode);
 
-  CGFloat BackingScaleFactor();
+  double BackingScaleFactor();
   void BackingScaleFactorChanged();
   virtual float GetDPI() override {
     // XXX: terrible
@@ -133,6 +137,11 @@ class nsWindow final : public nsBaseWidget {
   // and we can start modifying CALayers from the compositor thread again.
   void UnsuspendAsyncCATransactions();
 
+  void SetAndroidView(mozilla::widget::AndroidView* aView);
+  mozilla::widget::AndroidView* GetAndroidView() const;
+
+  mozilla::widget::EventDispatcher* GetEventDispatcher() const;
+
   static already_AddRefed<nsWindow> From(nsPIDOMWindowOuter* aDOMWindow);
   static already_AddRefed<nsWindow> From(nsIWidget* aWidget);
 
@@ -146,7 +155,12 @@ class nsWindow final : public nsBaseWidget {
 
   void TearDownView();
 
+  // FIXME: Better way to make `nsWindow.h` valid C++
+#ifdef __OBJC__
   ChildView* mNativeView;
+#else
+  id mNativeView;
+#endif
   bool mVisible;
   nsSizeMode mSizeMode;
   nsTArray<nsWindow*> mChildren;
@@ -158,6 +172,8 @@ class nsWindow final : public nsBaseWidget {
   RefPtr<mozilla::layers::NativeLayerRootCA> mNativeLayerRoot;
 
   RefPtr<mozilla::CancelableRunnable> mUnsuspendAsyncCATransactionsRunnable;
+
+  RefPtr<mozilla::widget::AndroidView> mAndroidView;
 
   void OnSizeChanged(const mozilla::gfx::IntSize& aSize);
 

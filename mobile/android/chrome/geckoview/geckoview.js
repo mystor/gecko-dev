@@ -538,9 +538,11 @@ function createBrowser() {
   browser.setAttribute("primary", "true");
   browser.setAttribute("flex", "1");
   browser.setAttribute("maychangeremoteness", "true");
-  browser.setAttribute("remote", "true");
-  browser.setAttribute("remoteType", E10SUtils.DEFAULT_REMOTE_TYPE);
-  browser.setAttribute("messagemanagergroup", "browsers");
+  if (Services.appinfo.browserTabsRemoteAutostart) {
+    browser.setAttribute("remote", "true");
+    browser.setAttribute("remoteType", E10SUtils.DEFAULT_REMOTE_TYPE);
+    browser.setAttribute("messagemanagergroup", "browsers");
+  }
 
   // This is only needed for mochitests, so that they honor the
   // prefers-color-scheme.content-override pref. GeckoView doesn't set this

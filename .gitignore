@@ -142,6 +142,8 @@ mobile/android/gradle/.gradle
 /*.xcodeproj/
 mobile/ios/TestRunner/TestRunner.xcodeproj/project.xcworkspace/xcuserdata
 mobile/ios/TestRunner/TestRunner.xcodeproj/xcuserdata
+mobile/ios/GeckoViewAPI/.build
+mobile/ios/GeckoViewAPI/.swiftpm
 
 # Rust/Cargo output from running `cargo` directly
 /target/
